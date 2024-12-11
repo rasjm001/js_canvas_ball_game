@@ -97,13 +97,59 @@ class Enemy{
     }
 }
 
+//create a friction var to reduce the speed of the particles over time
+const friction = 0.98
+
+class Particle{
+    constructor(x, y, radius, colour, velocity){
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.colour = colour;
+        this.velocity =velocity;
+
+        //alpha value added to enable fading of particle from screen
+        // doesnt need to be passed in, as always starts at one
+        this.alpha =1;
+
+    }
+
+    //function to call to draw the circle using the provided parameters
+    draw(){
+
+        //need to use the context.save, as manipulation the alpha values
+        context.save()
+        context.globalAlpha = this.alpha
+        //beingPath() to start the drawing process
+        context.beginPath()
+
+        //create the circle using the provided parameters
+        context.arc(this.x, this.y, this.radius, 0, Math.PI*2, false);
+        context.fillStyle =this.colour;
+        context.fill();
+        context.restore()
+    }
+
+    //update function for the changes to occur during animation
+    update(){
+        
+        this.velocity.x * friction;
+        this.velocity.y * friction;
+        this.draw();
+        this.x = this.x + this.velocity.x;
+        this.y = this.y + this.velocity.y;
+        this.alpha -= 0.01
+
+    }
+}
+
 
 //determine the middle of the window for the player spawning site ( to accomadate for different screens)
 canvas_middle_width = canvas.width / 2;
 canvas_middle_height = canvas.height /2;
 
 // create an instance of the player
-const player = new Player(canvas_middle_width, canvas_middle_height, 30, 'blue');
+const player = new Player(canvas_middle_width, canvas_middle_height, 10, 'white');
 
 //create an array to hold all the projectile so they can drawn out at once;
 const projectiles_array = [];
@@ -111,12 +157,15 @@ const projectiles_array = [];
 // create array for enemies
 const enemy_array= [];
 
+// particle array
+const particle_array= []
+
 function spawn_enemies(){
     //set interval ( code you want to call, time between calls)
     setInterval(()=>{
 
         // set a random spawn size between 4 and 30
-        const radius = Math.random() * (30-4) + 4;
+        const radius = Math.random() * (30-5) + 5;
         
         let x;
         let y;
@@ -138,8 +187,8 @@ function spawn_enemies(){
          
 
        
-        
-        const colour = "green";
+        //Random colour generator for JS (using template literal)
+        const colour = `hsl(${Math.random() *360}, 50%, 50%)`
         
         // determine the angle towards the player ( centre of sceen)
         const angle = Math.atan2(
@@ -164,21 +213,51 @@ function spawn_enemies(){
 
 spawn_enemies();
 
+//variable for the current animation frame for pause/gameover
+let animation_id;
+
+
 //animation function
 function animate(){
 
     //call the animate function within the function to create ongoing animation loop
-    requestAnimationFrame(animate)
+    // assign the current frame to var for gameover /pause screen
+    animation_id = requestAnimationFrame(animate)
 
     //clear the canvas prior to drawing next frame;
-    context.clearRect(0,0, canvas.width, canvas.height);
+    //if using clearRect it will clear the background too - use fillstyle to have consitent bg
+    //context.clearRect(0,0, canvas.width, canvas.height);
 
+    //using the 0.1 as opacity creates streaking lighttrail effects
+    context.fillStyle = "rgba(0,0,0,1)"
+    //context.fillStyle = "rgba(0,0,0,.1)"
+    context.fillRect(0, 0, canvas.width, canvas.height);
     // draw the player to the screen after clearing the screen
     player.draw();
 
+    //loop through and draw the particles in the particle array
+
+    particle_array.forEach((particle, index) =>{
+        if(particle.alpha <= 0 ){
+            particle_array.splice(index,1)
+        }else{
+        particle.update()}
+    })
     // update the position and draw each projectile in the projectile arrat
-    projectiles_array.forEach((projectile) =>{
+    projectiles_array.forEach((projectile, projectile_index) =>{
         projectile.update()
+
+        //remove the projectile if they are off the screen
+        if( projectile.x + projectile.radius < 0 || 
+            projectile.x - projectile.radius > canvas.width||
+            projectile.y +projectile.radius < 0 || 
+            projectile.y - projectile.radius > canvas.height
+        )
+        {
+            setTimeout(()=>{
+                projectiles_array.splice(projectile_index,1)
+            }, 0)
+        }
     })
 
     enemy_array.forEach((enemy, index) => {
@@ -189,7 +268,9 @@ function animate(){
         
         if (distance_to_player -enemy.radius - player.radius < 1){
 
-            console.log("player has been hit")
+            //cancel animation on the current frame if the player is hit
+            cancelAnimationFrame(animation_id);
+            
         }
 
         //loop through projectiles to check for collisions
@@ -200,7 +281,30 @@ function animate(){
 
             //check to see if the distance, minus the radius of both the enemy and projectile is <1
             if(distance - enemy.radius - projectile.radius <1){
+                
+                //determine the amount of particles accourding to the enemines radius ( eg bigger = more)
+                for(let i = 0; i < enemy.radius; i++){
+                    //create random radius up to 3.5
+                    particle_array.push(new Particle(projectile.x, projectile.y, Math.random()*3.5, enemy.colour, 
+                    {
+                        x: (Math.random() -.5) * (Math.random() * 6), 
+                        y: (Math.random()-.5)* (Math.random() * 6)}))
+                }
 
+                //if statement to check the radius size of the enmey ( if big enough, shrink until small)
+                if(enemy.radius - 10 > 6){
+                    //enemy.radius -=10
+                    gsap.to(enemy,{
+                        radius: enemy.radius - 10
+                    })
+                    setTimeout(() => {
+                 
+                        //take the projectile out of the projectile array at the projectile's index.
+                        projectiles_array.splice(projectile_index, 1);
+    
+                    }, 0)
+                }else
+                {
                 //use setTimeout to prevent flashing of objcets when deleted after collision by seeing timeout to 0 (waits to tnext frame)
                 setTimeout(() => {
                     //take the enemy out of the enemy array at the index of the array
@@ -209,7 +313,7 @@ function animate(){
                     //take the projectile out of the projectile array at the projectile's index.
                     projectiles_array.splice(projectile_index, 1);
 
-                }, 0)
+                }, 0)}
 
              
 
@@ -225,18 +329,20 @@ function animate(){
 
 // add an event listener ( takes parameter of the event and a function)
 window.addEventListener("click", (event) => {
-
+    console.log(projectiles_array)
     //get the angle to the mouse click position;
     const angle = Math.atan2(event.clientY - canvas.height/2, event.clientX - canvas.width/2 )
     
+    const velocity_multiplier = 5;
+
     const velocity = {
-        x: Math.cos(angle),
-        y: Math.sin(angle)
+        x: Math.cos(angle) *velocity_multiplier,
+        y: Math.sin(angle) * velocity_multiplier
     }
 
 
     //create instance o projectile on clivk and add to array
-    projectiles_array.push(new Projectile(canvas.width/2, canvas.height/2, 5, 'red', velocity ))
+    projectiles_array.push(new Projectile(canvas.width/2, canvas.height/2, 5, 'white', velocity ))
 
 
 
