@@ -1,5 +1,5 @@
 //Find the canvas element in the html document and assign to a const
-const canvas = document.querySelector('canvas');
+const canvas = document.querySelector("canvas");
 
 //context cont- contain all the information for the canvas eg style, lines, colours
 const context = canvas.getContext('2d');
