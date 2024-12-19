@@ -1,8 +1,19 @@
+
 //Find the canvas element in the html document and assign to a const
 const canvas = document.querySelector("canvas");
 
 //context cont- contain all the information for the canvas eg style, lines, colours
 const context = canvas.getContext('2d');
+
+
+//find the score element with the id #score_element
+const score_element = document.querySelector('#score_element');
+
+//find the start game button
+const start_button = document.querySelector('#start_game_button');
+
+//find the menu screen
+const menu = document.querySelector('#menu_screen')
 
 
 //set the canvas width to take up the whole screen;
@@ -216,6 +227,8 @@ spawn_enemies();
 //variable for the current animation frame for pause/gameover
 let animation_id;
 
+//variable for the score 
+let score = 0;
 
 //animation function
 function animate(){
@@ -282,6 +295,12 @@ function animate(){
             //check to see if the distance, minus the radius of both the enemy and projectile is <1
             if(distance - enemy.radius - projectile.radius <1){
                 
+                //increase score when collision occurs with enemy
+                score += 100;
+                
+                //change the inner html of the score_element to the score
+                score_element.innerHTML = score;
+
                 //determine the amount of particles accourding to the enemines radius ( eg bigger = more)
                 for(let i = 0; i < enemy.radius; i++){
                     //create random radius up to 3.5
@@ -307,6 +326,9 @@ function animate(){
                 {
                 //use setTimeout to prevent flashing of objcets when deleted after collision by seeing timeout to 0 (waits to tnext frame)
                 setTimeout(() => {
+
+                    score += 250;
+                    score_element.innerHTML = score
                     //take the enemy out of the enemy array at the index of the array
                     enemy_array.splice(index, 1);
 
@@ -328,7 +350,7 @@ function animate(){
 
 
 // add an event listener ( takes parameter of the event and a function)
-window.addEventListener("click", (event) => {
+addEventListener("click", (event) => {
     console.log(projectiles_array)
     //get the angle to the mouse click position;
     const angle = Math.atan2(event.clientY - canvas.height/2, event.clientX - canvas.width/2 )
@@ -361,4 +383,10 @@ window.addEventListener("click", (event) => {
     console.log("clicked")
 })
 
-animate();
+start_button.addEventListener('click', () => {
+    console.log("start button clicked")
+    animate();
+    menu.style.display = 'none'
+
+})
+
