@@ -12,6 +12,10 @@ const score_element = document.querySelector('#score_element');
 //find the start game button
 const start_button = document.querySelector('#start_game_button');
 
+//const for the game over score
+
+const big_score = document.querySelector("#big_score")
+
 //find the menu screen
 const menu = document.querySelector('#menu_screen')
 
@@ -160,16 +164,34 @@ canvas_middle_width = canvas.width / 2;
 canvas_middle_height = canvas.height /2;
 
 // create an instance of the player
-const player = new Player(canvas_middle_width, canvas_middle_height, 10, 'white');
+let player = new Player(canvas_middle_width, canvas_middle_height, 10, 'white');
 
 //create an array to hold all the projectile so they can drawn out at once;
-const projectiles_array = [];
+let projectiles_array = [];
 
 // create array for enemies
-const enemy_array= [];
+let enemy_array= [];
 
 // particle array
-const particle_array= []
+let particle_array= []
+
+function init(){
+// create an instance of the player
+player = new Player(canvas_middle_width, canvas_middle_height, 10, 'white');
+
+//create an array to hold all the projectile so they can drawn out at once;
+projectiles_array = [];
+
+// create array for enemies
+enemy_array= [];
+
+// particle array
+particle_array= []
+
+score = 0;
+score_element.innerHTML = score;
+big_score.innerHTML =score;
+}
 
 function spawn_enemies(){
     //set interval ( code you want to call, time between calls)
@@ -222,7 +244,7 @@ function spawn_enemies(){
 }
 
 
-spawn_enemies();
+
 
 //variable for the current animation frame for pause/gameover
 let animation_id;
@@ -283,6 +305,12 @@ function animate(){
 
             //cancel animation on the current frame if the player is hit
             cancelAnimationFrame(animation_id);
+
+            //make the menu reappear on the screen
+            menu.style.display ='flex';
+
+            //change the end score element
+            big_score.innerHTML = score
             
         }
 
@@ -350,7 +378,7 @@ function animate(){
 
 
 // add an event listener ( takes parameter of the event and a function)
-addEventListener("click", (event) => {
+canvas.addEventListener("click", (event) => {
     console.log(projectiles_array)
     //get the angle to the mouse click position;
     const angle = Math.atan2(event.clientY - canvas.height/2, event.clientX - canvas.width/2 )
@@ -384,9 +412,23 @@ addEventListener("click", (event) => {
 })
 
 start_button.addEventListener('click', () => {
+    init()
     console.log("start button clicked")
     animate();
+    spawn_enemies();
     menu.style.display = 'none'
+   
 
 })
 
+
+
+/* Toggle between adding and removing the "responsive" class to topnav when the user clicks on the icon */
+function topbar_navigation_function() {
+    var x = document.getElementById("myTopnav");
+    if (x.className === "topnav") {
+      x.className += " responsive";
+    } else {
+      x.className = "topnav";
+    }
+  }

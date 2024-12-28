@@ -1,3 +1,5 @@
+<!-- link to the home page css for the top bar nav css-->
+ <link href = "../HomePage/main_css.css" rel = "stylesheet">
 <link href="./tailwindstyle.css" rel="stylesheet">
 
 <!-- style tag to remove the margin from the body element (could also add to CSS)-->
@@ -7,7 +9,37 @@
         background: black;
     }
 
+     .topnav {
+        position: relative;
+        z-index: 10; /* Ensure it stays on top of the menu screen */
+    }
+
+    #menu_screen {
+        position: fixed;
+        inset: 50px 0 0 0; /* Adjust to not cover the navigation bar */
+        z-index: 5; /* Ensure it is below the navigation bar */
+        display: flex;
+        items-center: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.8); /* Optional: Dim background */
+    }
 </style>
+
+
+    <!--Top navigation bar-->
+    <div class="topnav" id="myTopnav">
+        <a href="../HomePage/main_html.html" class="active">Home</a> 
+        <a href="../project_one_simple_tutorial/index.html"> Bouncing Balls </a>
+        <a href="../whack_a_mole/index.html"> Whack a Mole </a>
+        <a href="../SimpleGame/Index.html"> Defence Game </a>
+        <!-- <a href="../Demo_3/Index.html"> Demo_3</a> -->
+        <a href ="../Capstone Project 1/capstone_project.html"> Capstone Project</a>
+        <a href="javascript:void(0);" class="icon" onclick="topbar_navigation_function()">
+          <i class="fa fa-bars"></i>
+        </a>
+      </div>
+
+
 
 <div class = "fixed text-white text-sm ml-2 mt-1 select-none">
     <span >Score: </span>
@@ -15,9 +47,9 @@
 
 </div>
 
-<div class="fixed inset-0 flex items-center justify-center " id="menu_screen" >
+<div class="fixed inset-0 flex items-center justify-center  " id="menu_screen" >
     <div class="bg-white max-w-md w-full p-6 text-center rounded-md">
-        <h1 class="text-4xl font-bold leading-none">0</h1>
+        <h1 class="text-4xl font-bold leading-none" id = "big_score">0</h1>
         <p class = "text-sm text-gray-700 mb-4">Points</p>
         <div>
             <button  class = "bg-blue-500 w-full py-3 rounded-full text-white" id="start_game_button"> Start Game</button>
